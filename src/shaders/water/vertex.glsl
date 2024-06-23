@@ -1,5 +1,3 @@
-attribute float aRandomUvCount;
-
 uniform float uTime;
 uniform float uWaveElevation;
 uniform vec2 uWaveFrequency;
@@ -8,10 +6,10 @@ uniform float uSmallWaveElevation;
 uniform float uSmallWaveFrequency;
 uniform float uSmallWaveSpeed;
 uniform float uSmallWaveIterations;
+uniform float uFogDepth;
 
-varying vec2 vUv;
-varying vec4 vPosition;
 varying float vElevation;
+varying float vFogDepth;
 
 // Classic Perlin 3D Noise 
 // by Stefan Gustavson
@@ -94,46 +92,15 @@ float cnoise(vec3 P) {
     return 2.2 * n_xyz;
 }
 
-// void main() {
-//     float waveCount = 3.0;
-//     float waveSpeed = 1.0;
-//     float waveStrength = 0.4;
-//     float waveRandomness = aRandomUvCount * 0.1;
-
-//     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-//     float elevationY = sin((modelPosition.x * waveCount) + (uTime * waveSpeed) + waveRandomness) * waveStrength;
-//     float elevationX = sin((modelPosition.z * waveCount) + (uTime * waveSpeed) + waveRandomness) * waveStrength;
-
-//     modelPosition.y += elevationY * elevationX; 
-
-//     vec4 viewPosition = viewMatrix * modelPosition;
-//     vec4 projectedPosition = projectionMatrix * viewPosition;
-
-//     gl_Position = projectedPosition;
-
-//     vUv = uv;
-//     vPosition = modelPosition;
-// }
-
 void main() {
     float waveSpeed = uTime * 1.0;
     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-    float elevation = (
-        sin((modelPosition.x * uWaveFrequency.x) + waveSpeed) *
-        sin((modelPosition.z * uWaveFrequency.y) + waveSpeed)) * 
-    uWaveElevation;
-
+    float elevation = (sin((modelPosition.x * uWaveFrequency.x) + waveSpeed) *
+        sin((modelPosition.z * uWaveFrequency.y) + waveSpeed)) * uWaveElevation;
 
     for(float i = 1.0; i <= uSmallWaveIterations; i++) {
-        elevation -= abs(
-            cnoise(
-                vec3(
-                    modelPosition.xz * 
-                    uSmallWaveFrequency * i, 
-                    uTime * uSmallWaveSpeed
-                    )
-            ) * uSmallWaveElevation / i);
+        elevation -= abs(cnoise(vec3(modelPosition.xz * uSmallWaveFrequency * i, uTime * uSmallWaveSpeed)) * uSmallWaveElevation / i);
     }
 
     modelPosition.y += elevation;
@@ -143,7 +110,6 @@ void main() {
 
     gl_Position = projectedPosition;
 
-    vUv = uv;
-    vPosition = modelPosition;
+    vFogDepth = -viewPosition.z * uFogDepth;
     vElevation = elevation;
 }

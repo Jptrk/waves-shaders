@@ -16,29 +16,20 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+scene.background = new THREE.Color("#698391");
 
-const generateRandomFloat = (count) => {
-  const arr = new Float32Array(count);
-
-  for (const i in arr) {
-    arr[i] = Math.random();
-  }
-
-  return arr;
-};
-
+gui.addColor(scene, "background");
 /**
  * Water
  */
 
 // Geometry
-const waterGeometry = new THREE.PlaneGeometry(5, 5, 512, 512);
-const randomUvCount = generateRandomFloat(waterGeometry.attributes.uv.count);
-waterGeometry.setAttribute("aRandomUvCount", new THREE.BufferAttribute(randomUvCount, 1));
+const waterGeometry = new THREE.PlaneGeometry(10, 10, 512, 512);
 
 // Color
 debugObject.depthColor = "#186691";
 debugObject.surfaceColor = "#9bd8ff";
+debugObject.fogColor = "#698391";
 
 // Material
 const waterMaterial = new THREE.ShaderMaterial({
@@ -59,6 +50,11 @@ const waterMaterial = new THREE.ShaderMaterial({
 
     uColorOffset: { value: 0.07 },
     uColorMultiplier: { value: 1.75 },
+
+    uFogColor: { value: new THREE.Color(debugObject.fogColor) },
+    uFogDepth: { value: 0.3 },
+    uFogNear: { value: 0.1 },
+    uFogFar: { value: 2.0 },
   },
 });
 
@@ -78,6 +74,9 @@ gui.add(waterMaterial.uniforms.uSmallWaveElevation, "value").min(0).max(1.0).ste
 gui.add(waterMaterial.uniforms.uSmallWaveFrequency, "value").min(0).max(30).step(0.01).name("uSmallWaveFrequency");
 gui.add(waterMaterial.uniforms.uSmallWaveSpeed, "value").min(0).max(4).step(0.01).name("uSmallWaveSpeed");
 gui.add(waterMaterial.uniforms.uSmallWaveIterations, "value").min(0).max(5).step(0.01).name("uSmallWaveIterations");
+gui.add(waterMaterial.uniforms.uFogDepth, "value").min(0).max(5).step(0.01).name("Fog depth");
+gui.add(waterMaterial.uniforms.uFogNear, "value").min(0).max(10).step(0.01).name("uFogNear");
+gui.add(waterMaterial.uniforms.uFogFar, "value").min(0).max(10).step(0.01).name("uFogFar");
 
 gui
   .addColor(debugObject, "depthColor")
@@ -89,6 +88,12 @@ gui
   .addColor(debugObject, "surfaceColor")
   .onChange(() => {
     waterMaterial.uniforms.uWaveSurfaceColor.value.set(debugObject.surfaceColor);
+  }
+);
+gui
+  .addColor(debugObject, "fogColor")
+  .onChange(() => {
+    waterMaterial.uniforms.uFogColor.value.set(debugObject.fogColor);
   }
 );
 /**
@@ -123,12 +128,11 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-
 const axesHelper = new THREE.AxesHelper();
-// axesHelper.setColors("red", "green", "blue");
-// scene.add(axesHelper);
+axesHelper.setColors("red", "green", "blue");
+scene.add(axesHelper);
 
-camera.position.set(0, 1, 2);
+camera.position.set(0, 1.5, 2);
 scene.add(camera);
 
 // Controls
@@ -151,10 +155,9 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
-  // console.log("z", camera.position.z);
 
   waterMaterial.uniforms.uTime.value = elapsedTime;
-
+  
   // Update controls
   controls.update();
 
