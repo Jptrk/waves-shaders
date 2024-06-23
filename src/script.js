@@ -130,7 +130,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 const axesHelper = new THREE.AxesHelper();
 axesHelper.setColors("red", "green", "blue");
-scene.add(axesHelper);
+// scene.add(axesHelper);
 
 camera.position.set(0, 1.5, 2);
 scene.add(camera);

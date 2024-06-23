@@ -15,7 +15,7 @@ void main() {
     float mixedStrength = (vElevation + uColorOffset) * uColorMultiplier;
     vec3 originalColor = mix(uWaveDepthColor, uWaveSurfaceColor, mixedStrength);
 
-    float fogAmount = smoothstep(uFogNear, uFogFar, vFogDepth);
+    float fogAmount = smoothstep(-uFogNear, uFogFar, vFogDepth);
     vec3 colorWithFog = mix(originalColor, uFogColor, fogAmount);
 
     gl_FragColor = vec4(colorWithFog, 1.0);
