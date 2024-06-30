@@ -24,12 +24,13 @@ gui.addColor(scene, "background");
  */
 
 // Geometry
-const waterGeometry = new THREE.PlaneGeometry(10, 10, 512, 512);
+const waterGeometry = new THREE.PlaneGeometry(3, 3, 512, 512);
 
 // Color
 debugObject.depthColor = "#186691";
 debugObject.surfaceColor = "#9bd8ff";
 debugObject.fogColor = "#698391";
+debugObject.foamColor = "#ffffff";
 
 // Material
 const waterMaterial = new THREE.ShaderMaterial({
@@ -55,6 +56,9 @@ const waterMaterial = new THREE.ShaderMaterial({
     uFogDepth: { value: 0.3 },
     uFogNear: { value: 0.1 },
     uFogFar: { value: 2.0 },
+
+    uFoamColor: { value: new THREE.Color(debugObject.foamColor) },
+    uFoamMultiplier: { value: 0.4 },
   },
 });
 
@@ -77,6 +81,7 @@ gui.add(waterMaterial.uniforms.uSmallWaveIterations, "value").min(0).max(5).step
 gui.add(waterMaterial.uniforms.uFogDepth, "value").min(0).max(5).step(0.01).name("Fog depth");
 gui.add(waterMaterial.uniforms.uFogNear, "value").min(0).max(10).step(0.01).name("uFogNear");
 gui.add(waterMaterial.uniforms.uFogFar, "value").min(0).max(10).step(0.01).name("uFogFar");
+gui.add(waterMaterial.uniforms.uFoamMultiplier, "value").min(0).max(1.0).step(0.01).name("uFoamMultiplier");
 
 gui
   .addColor(debugObject, "depthColor")
@@ -96,6 +101,22 @@ gui
     waterMaterial.uniforms.uFogColor.value.set(debugObject.fogColor);
   }
 );
+gui
+  .addColor(debugObject, "foamColor")
+  .onChange(() => {
+    waterMaterial.uniforms.uFoamColor.value.set(debugObject.foamColor);
+  }
+);
+
+/**
+ * Cube
+ */
+// const cubeGeometry = new THREE.BoxGeometry(1, 1, 1, 5, 5, 5);
+// const cubeMaterial = new THREE.MeshBasicMaterial({ color: "#fff", wireframe: true });
+// const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+// scene.add(cubeMesh);
+
 /**
  * Sizes
  */

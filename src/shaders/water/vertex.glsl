@@ -10,6 +10,7 @@ uniform float uFogDepth;
 
 varying float vElevation;
 varying float vFogDepth;
+varying float vSmallElevation;
 
 // Classic Perlin 3D Noise 
 // by Stefan Gustavson
@@ -96,13 +97,16 @@ void main() {
     float waveSpeed = uTime * 1.0;
     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-    float elevation = (sin((modelPosition.x * uWaveFrequency.x) + waveSpeed) *
-        sin((modelPosition.z * uWaveFrequency.y) + waveSpeed)) * uWaveElevation;
-
+    float wave1 = sin((modelPosition.x * uWaveFrequency.x) + waveSpeed);
+    float wave2 = sin((modelPosition.z * uWaveFrequency.y) + waveSpeed);
+    float bigElevation = (wave1 * wave2) * uWaveElevation;
+    
+    float smallElevation = 1.0;
     for(float i = 1.0; i <= uSmallWaveIterations; i++) {
-        elevation -= abs(cnoise(vec3(modelPosition.xz * uSmallWaveFrequency * i, uTime * uSmallWaveSpeed)) * uSmallWaveElevation / i);
+        smallElevation -= (abs(cnoise(vec3(modelPosition.xz * uSmallWaveFrequency * i, uTime * uSmallWaveSpeed))) / i);
     }
 
+    float elevation = bigElevation + (smallElevation * uSmallWaveElevation);
     modelPosition.y += elevation;
 
     vec4 viewPosition = viewMatrix * modelPosition;
@@ -112,4 +116,5 @@ void main() {
 
     vFogDepth = -viewPosition.z * uFogDepth;
     vElevation = elevation;
+    vSmallElevation = smallElevation * smallElevation * smallElevation * smallElevation;
 }
